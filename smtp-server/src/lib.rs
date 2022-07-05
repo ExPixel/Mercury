@@ -62,6 +62,7 @@ impl Server {
             if let Err(err) = conn.run().await {
                 on_conn_err(err);
             }
+            trace!("connection closed");
         }
         .instrument(span);
         tokio::task::spawn(task);

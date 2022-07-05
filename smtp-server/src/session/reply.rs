@@ -1,5 +1,6 @@
 use std::num::{NonZeroU16, NonZeroUsize};
 
+#[derive(Default)]
 pub struct Reply {
     code: Option<Code>,
     data: Vec<u8>,
@@ -7,6 +8,17 @@ pub struct Reply {
 }
 
 impl Reply {
+    pub fn data(&self) -> &[u8] {
+        &self.data[..]
+    }
+
+    pub fn finish(&mut self) {
+        if !self.data.is_empty() {
+            return;
+        }
+        self.line(self.code.and_then(|code| code.text()).unwrap_or(""))
+    }
+
     pub fn line<D: AsRef<[u8]>>(&mut self, data: D) {
         use std::io::Write as _;
         if !self.data.is_empty() {
