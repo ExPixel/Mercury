@@ -9,3 +9,5 @@ edition = "2021"
 smtp-server = { path = "../smtp-server" }
 anyhow = "1"
 tokio = { version = "1", default-features = false, features = ["rt-multi-thread"] }
+tracing-subscriber = "0.3"
+tracing = { version = "0.1", default-features = false, features = ["std", "log"] }

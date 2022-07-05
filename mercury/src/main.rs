@@ -5,6 +5,10 @@ fn main() -> anyhow::Result<()> {
         .enable_all()
         .build()
         .context("error while creating tokio runtime")?;
+    let subscriber = tracing_subscriber::FmtSubscriber::builder()
+        .with_max_level(tracing::Level::TRACE)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("failed to set tracing subscriber");
     rt.block_on(run())
 }
 
@@ -15,5 +19,5 @@ async fn run() -> anyhow::Result<()> {
         .on_new_mail(|mail| {})
         .build()
         .context("error while creating server instance")?;
-    todo!();
+    server.run().await.map_err(Into::into)
 }
