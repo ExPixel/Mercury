@@ -34,10 +34,7 @@ impl Connection {
         self.send(&reply).await?;
 
         self.line().await?;
-        let parsed = crate::session::cmd_parser::CommandParser::new()
-            .parse(std::str::from_utf8(&self.data).unwrap())
-            .expect("lol");
-        debug!(cmd = debug(parsed), "command");
+        // debug!(cmd = debug(parsed), "command");
 
         Ok(())
     }
