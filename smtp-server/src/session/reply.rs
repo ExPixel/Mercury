@@ -21,17 +21,16 @@ impl Reply {
 
     pub fn line<D: AsRef<[u8]>>(&mut self, data: D) {
         use std::io::Write as _;
-        if !self.data.is_empty() {
-            self.data.extend(b"\r\n");
-        }
+
         let code = self.code.expect("must provide a code before reply text");
-        write!(self.data, "{}", u16::from(code)).expect("failed to write code to reply");
+        write!(self.data, "{} ", u16::from(code)).expect("failed to write code to reply");
 
         if let Some(dash) = self.dash.take().map(NonZeroUsize::get) {
             self.data[dash] = b'-';
         }
-        self.dash = NonZeroUsize::new(self.data.len());
+        self.dash = NonZeroUsize::new(self.data.len() - 1);
         self.data.extend(data.as_ref());
+        self.data.extend(b"\r\n");
     }
 
     pub fn code(&mut self, code: Code) {

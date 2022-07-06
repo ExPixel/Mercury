@@ -1,0 +1,16 @@
+use crate::session::cmd::Command;
+
+grammar;
+
+pub Command: Command = {
+    "EHLO" SP <domain:Domain> CRLF => Command::EHLO { domain: domain }
+};
+
+Domain: String = " " => String::from("hello");
+
+
+LetDig = r"[0-9]";
+LdhStr = ();
+
+SP = " ";
+CRLF = "\r\n";
