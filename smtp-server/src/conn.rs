@@ -1,72 +1,91 @@
-use std::sync::Arc;
+use std::time::Duration;
 
-use tokio::io::{AsyncBufReadExt, AsyncReadExt as _, AsyncWriteExt as _, BufStream};
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt as _, BufStream};
 use tokio::net::TcpStream;
 use tracing::debug;
 
 use crate::error::Result;
-use crate::session::reply::{Code, Reply};
-use crate::{OnNewMail, Session};
+use crate::session::reply::Reply;
+use crate::{Error, Session};
 
 pub struct Connection {
     stream: BufStream<TcpStream>,
     session: Session,
-    on_new_mail: Arc<OnNewMail>,
-    data: Vec<u8>,
+    read_timeout: Duration,
+    write_timeout: Duration,
 }
 
 impl Connection {
-    pub fn new(stream: TcpStream, on_new_mail: Arc<OnNewMail>) -> Self {
+    pub fn new(stream: TcpStream, session: Session) -> Self {
         Connection {
             stream: BufStream::new(stream),
-            on_new_mail,
-            session: Session::default(),
-            data: Vec::with_capacity(1024),
+            session,
+            read_timeout: Duration::from_secs(5),
+            write_timeout: Duration::from_secs(5),
         }
     }
 
     pub async fn run(mut self) -> Result<()> {
         let mut reply = Reply::default();
 
-        // open the connection
-        reply.code(Code::SERVICE_READY);
-        reply.finish();
-        self.send(&reply).await?;
-
-        self.line().await?;
-        // debug!(cmd = debug(parsed), "command");
+        loop {
+            self.session.on_recv(&mut reply);
+            reply.finish();
+            self.write_reply(&reply).await?;
+            if self.session.closed() {
+                break;
+            }
+            self.read_line().await?;
+            reply.clear();
+        }
 
         Ok(())
     }
 
-    async fn send(&mut self, reply: &Reply) -> Result<()> {
+    async fn write_reply(&mut self, reply: &Reply) -> Result<()> {
         debug!(
             count = display(reply.data().len()),
             bytes = debug(String::from_utf8_lossy(reply.data())),
             "sending",
         );
 
-        self.stream.get_mut().writable().await?;
-        self.stream.write_all(reply.data()).await?;
-        self.stream.flush().await?;
+        tokio::time::timeout(self.write_timeout, async move {
+            self.stream.get_mut().writable().await?;
+            self.stream.write_all(reply.data()).await?;
+            self.stream.flush().await?;
+            Result::<()>::Ok(())
+        })
+        .await
+        .map_err(|_| Error::WriteTimeout)??;
+
         Ok(())
     }
 
-    async fn line(&mut self) -> Result<()> {
-        self.stream.get_mut().readable().await?;
-        self.data.clear();
+    async fn read_line(&mut self) -> Result<()> {
+        let terminator = self.session.terminator();
+        let terminator_end = *terminator
+            .last()
+            .expect("terminator must be at least 1 byte in length");
+        let buffer = self.session.buffer_mut();
+
+        tokio::time::timeout(self.read_timeout, self.stream.get_mut().readable())
+            .await
+            .map_err(|_| Error::ReadTimeout)??;
+
         loop {
-            let count = self.stream.read_until(b'\n', &mut self.data).await?;
+            let count = tokio::time::timeout(self.read_timeout, {
+                self.stream.read_until(terminator_end, buffer)
+            })
+            .await
+            .map_err(|_| Error::ReadTimeout)??;
 
             debug!(
                 count = display(count),
-                bytes = debug(String::from_utf8_lossy(
-                    &self.data[(self.data.len() - count)..]
-                )),
+                bytes = debug(String::from_utf8_lossy(&buffer[(buffer.len() - count)..])),
                 "received"
             );
 
-            if count == 0 || self.data.ends_with(b"\r\n") {
+            if count == 0 || buffer.ends_with(terminator) {
                 break;
             }
         }

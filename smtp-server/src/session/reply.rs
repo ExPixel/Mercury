@@ -13,6 +13,7 @@ impl Reply {
     }
 
     pub fn finish(&mut self) {
+        assert!(!self.is_empty(), "reply must not be empty in finish");
         if !self.data.is_empty() {
             return;
         }
@@ -39,6 +40,7 @@ impl Reply {
 
     pub fn clear(&mut self) {
         self.code = None;
+        self.dash = None;
         self.data.clear();
     }
 
@@ -47,7 +49,7 @@ impl Reply {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Code(NonZeroU16);
 
 impl Code {

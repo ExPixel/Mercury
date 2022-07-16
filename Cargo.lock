@@ -366,6 +366,7 @@ name = "smtp-server"
 version = "0.1.0"
 dependencies = [
  "lettre",
+ "nom",
  "test-util",
  "thiserror",
  "tokio",

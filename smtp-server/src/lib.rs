@@ -1,9 +1,7 @@
 mod conn;
-mod email;
 mod error;
 mod session;
 
-pub use email::Email;
 pub use error::Error;
 pub use session::Session;
 
@@ -19,7 +17,7 @@ use tracing_futures::Instrument as _;
 use crate::conn::Connection;
 
 type OnConnErr = dyn Fn(Error) + Send + Sync;
-type OnNewMail = dyn Fn(Email) + Send + Sync;
+type OnNewMail = dyn Fn(RawMail) + Send + Sync;
 
 pub struct Server {
     socket_addr: Vec<SocketAddr>,
@@ -55,7 +53,8 @@ impl Server {
     fn accept(&mut self, stream: TcpStream, addr: SocketAddr) {
         trace!("accepted connection from {}", addr);
 
-        let conn = Connection::new(stream, self.on_new_mail.clone());
+        let sess = Session::new(self.on_new_mail.clone());
+        let conn = Connection::new(stream, sess);
         let span = tracing::trace_span!("connection", addr = display(addr));
         let on_conn_err = self.on_conn_err.clone();
         let task = async move {
@@ -107,7 +106,7 @@ impl ServerBuilder {
 
     pub fn on_new_mail<F>(mut self, f: F) -> Self
     where
-        F: 'static + Fn(Email) + Clone + Send + Sync,
+        F: 'static + Fn(RawMail) + Clone + Send + Sync,
     {
         self.on_new_mail = Some(Arc::new(f));
         self
@@ -148,6 +147,22 @@ impl Default for ServerBuilder {
             socket_addr: Ok(Vec::new()),
             on_conn_err: None,
             on_new_mail: None,
+        }
+    }
+}
+
+pub struct RawMail {
+    pub reverse_path: String,
+    pub forward_path: Vec<String>,
+    pub data: Vec<u8>,
+}
+
+impl RawMail {
+    pub fn new(reverse_path: String, forward_path: Vec<String>, data: Vec<u8>) -> Self {
+        Self {
+            reverse_path,
+            forward_path,
+            data,
         }
     }
 }
