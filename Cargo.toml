@@ -1,2 +1,2 @@
 [workspace]
-members = ["mercury", "smtp-server", "test-util"]
+members = ["mercury", "smtp-server", "mail", "test-util"]

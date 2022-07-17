@@ -2,6 +2,7 @@
 name = "smtp-server"
 version = "0.1.0"
 edition = "2021"
+description = "An SMTP server implementation (RFC 5321)"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
