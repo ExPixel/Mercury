@@ -33,8 +33,8 @@ fn main() -> anyhow::Result<()> {
 async fn run() -> anyhow::Result<()> {
     let server = smtp_server::Server::builder()
         .bind("localhost:8025")
-        .on_conn_err(|err| {})
-        .on_new_mail(|mail| {})
+        .on_conn_err(|_err| {})
+        .on_new_mail(|_mail| {})
         .build()
         .context("error while creating server instance")?;
     server.run().await.map_err(Into::into)
