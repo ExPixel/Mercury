@@ -1,5 +1,5 @@
 /*
-    Mercury, mail testing tool
+    Mercury SMTP Server
     Copyright (C) 2022 Adolph Celestin
 
     This program is free software: you can redistribute it and/or modify

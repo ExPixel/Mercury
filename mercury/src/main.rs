@@ -1,5 +1,5 @@
 /*
-    Mercury, mail testing tool
+    Mercury Mail Testing Tool
     Copyright (C) 2022 Adolph Celestin
 
     This program is free software: you can redistribute it and/or modify
