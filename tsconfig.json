@@ -5,6 +5,14 @@
         "esModuleInterop": true,
         "baseUrl": "web/src/",
         "rootDir": "web/src/",
-        "jsx": "react"
-    }
+        "jsx": "react",
+        "target": "ES2015",
+        "lib": [
+            "ESNext",
+            "DOM"
+        ]
+    },
+    "include": [
+        "./web/src/"
+    ]
 }
