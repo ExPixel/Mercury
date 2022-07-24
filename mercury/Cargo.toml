@@ -6,8 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+config = { version = "0.13", default-features = false, features = ["toml"] }
 smtp-server = { path = "../smtp-server" }
+web = { path = "../mercury-web", package = "mercury-web" }
 anyhow = "1"
 tokio = { version = "1", default-features = false, features = ["rt-multi-thread"] }
 tracing-subscriber = "0.3"
 tracing = { version = "0.1", default-features = false, features = ["std", "log"] }
+serde = { version = "1", default-features = false, features = ["std", "derive"] }

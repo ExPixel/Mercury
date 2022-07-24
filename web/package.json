@@ -7,9 +7,16 @@
     "build": "node tools/esbuild.js"
   },
   "devDependencies": {
-    "esbuild": "^0.14.49"
+    "esbuild": "^0.14.49",
+    "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.14"
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@fontsource/roboto": "^4.5.7",
+    "@mui/material": "^5.9.1",
+    "@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.14",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

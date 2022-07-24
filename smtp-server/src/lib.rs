@@ -54,7 +54,7 @@ impl Server {
     pub async fn run(mut self) -> Result<()> {
         let listener = TcpListener::bind(&self.socket_addr[..]).await?;
         let local_addr = listener.local_addr().expect("no TCP listener local addr");
-        tracing::info!(local_addr = display(local_addr), "starting SMTP server");
+        tracing::info!(addr = display(local_addr), "starting SMTP server");
         'main_loop: loop {
             tokio::select! {
                 accepted = listener.accept() => {
