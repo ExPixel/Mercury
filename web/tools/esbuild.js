@@ -25,7 +25,7 @@ async function build(environment, watch) {
     const minify = environment === Environment.Production;
 
     EsBuild.build({
-        entryPoints: ['src/main.ts'],
+        entryPoints: [Path.resolve(__dirname, '../src', 'main.ts')],
         outfile: Path.resolve(__dirname, '../../build', 'main.js'),
         loader: { '.woff': 'file', '.woff2': 'file' },
         plugins: [pnpPlugin()],

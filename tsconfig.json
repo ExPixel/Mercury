@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "isolatedModules": true,
+        "esModuleInterop": true,
+        "baseUrl": "web/src/",
+        "rootDir": "web/src/",
+        "jsx": "react"
+    }
+}
