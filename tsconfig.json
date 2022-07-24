@@ -3,6 +3,7 @@
         "noImplicitAny": true,
         "isolatedModules": true,
         "esModuleInterop": true,
+        "moduleResolution": "node",
         "baseUrl": "web/src/",
         "rootDir": "web/src/",
         "jsx": "react",
